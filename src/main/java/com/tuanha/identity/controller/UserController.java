@@ -17,6 +17,8 @@ import com.tuanha.identity.dto.request.UserUpdateRequest;
 import com.tuanha.identity.model.User;
 import com.tuanha.identity.service.IUserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -29,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody UserCreateRequest request) {
+    public User createUser(@RequestBody @Valid UserCreateRequest request) {
         return userService.createUser(request);
     }
 

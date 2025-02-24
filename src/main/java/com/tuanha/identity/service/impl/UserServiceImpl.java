@@ -24,10 +24,15 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User createUser(UserCreateRequest request) {
         User user = new User();
+        if(userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already exists.");
+        }
+
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        
         return userRepository.save(user);
     }
 

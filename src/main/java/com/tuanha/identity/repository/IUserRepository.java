@@ -7,5 +7,5 @@ import com.tuanha.identity.model.User;
 
 @Repository
 public interface IUserRepository extends JpaRepository<User, String>{
-    
+    boolean existsByUsername(String username);
 }

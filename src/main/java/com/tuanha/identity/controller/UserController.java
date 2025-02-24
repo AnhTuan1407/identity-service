@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
 import com.tuanha.identity.dto.response.ApiResponse;
+import com.tuanha.identity.dto.response.UserResponse;
 import com.tuanha.identity.model.User;
 import com.tuanha.identity.service.IUserService;
 
@@ -39,7 +40,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public User updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
+    public UserResponse updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(request, userId);
     }
     
@@ -50,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable("userId") String userId) {
+    public UserResponse getUser(@PathVariable("userId") String userId) {
         return userService.getUser(userId);
     }
 }

@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
+import com.tuanha.identity.dto.response.UserResponse;
 import com.tuanha.identity.exception.AppException;
 import com.tuanha.identity.exception.ErrorCode;
+import com.tuanha.identity.mapper.IUserMapper;
 import com.tuanha.identity.model.User;
 import com.tuanha.identity.repository.IUserRepository;
 import com.tuanha.identity.service.IUserService;
@@ -18,6 +20,9 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private IUserRepository userRepository;
 
+    @Autowired
+    private IUserMapper userMapper;
+
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -25,26 +30,20 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User createUser(UserCreateRequest request) {
-        User user = new User();
         if(userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTS);
         }
 
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        User user = userMapper.toUser(request);
         
         return userRepository.save(user);
     }
 
     @Override
-    public User updateUser(UserUpdateRequest request, String userId) {
-        User user = getUser(userId);
-        user.setPassword(request.getPassword());
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        return userRepository.save(user);
+    public UserResponse updateUser(UserUpdateRequest request, String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        userMapper.updateUser(user, request);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
@@ -53,8 +52,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User getUser(String userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    public UserResponse getUser(String userId) {
+        return userMapper.toUserResponse(userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
     
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
+import com.tuanha.identity.exception.AppException;
+import com.tuanha.identity.exception.ErrorCode;
 import com.tuanha.identity.model.User;
 import com.tuanha.identity.repository.IUserRepository;
 import com.tuanha.identity.service.IUserService;
@@ -25,7 +27,7 @@ public class UserServiceImpl implements IUserService {
     public User createUser(UserCreateRequest request) {
         User user = new User();
         if(userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists.");
+            throw new AppException(ErrorCode.USER_EXISTS);
         }
 
         user.setUsername(request.getUsername());
@@ -52,7 +54,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User getUser(String userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
     
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
+import com.tuanha.identity.dto.response.ApiResponse;
 import com.tuanha.identity.model.User;
 import com.tuanha.identity.service.IUserService;
 
@@ -31,8 +32,10 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody @Valid UserCreateRequest request) {
-        return userService.createUser(request);
+    public ApiResponse<User> createUser(@RequestBody @Valid UserCreateRequest request) {
+        ApiResponse<User> response = new ApiResponse<>();
+        response.setResult(userService.createUser(request));
+        return response;
     }
 
     @PutMapping("/{userId}")

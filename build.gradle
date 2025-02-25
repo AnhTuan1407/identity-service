@@ -31,6 +31,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.37'
 
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // OAuth2 Resource Server
     
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

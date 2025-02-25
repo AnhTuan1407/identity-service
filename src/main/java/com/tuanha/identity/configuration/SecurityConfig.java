@@ -1,46 +1,48 @@
 package com.tuanha.identity.configuration;
 
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final String[] PUBLIC_ENPOINTS = {"/auth/login", "/auth/introspect", "/users"};
+
+    @Value("${jwt.signerKey}")
+    private String signerKey;
+
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.authorizeRequests(
+            (authorizeRequest) -> authorizeRequest.requestMatchers(PUBLIC_ENPOINTS).permitAll().anyRequest().authenticated()
+        );
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        httpSecurity.oauth2ResourceServer(
+            oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+        );
+
+        return httpSecurity.build();
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("admin")
-                .password(passwordEncoder().encode("123456"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Tắt CSRF (nếu dùng API REST)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/public/**").permitAll() // Cho phép truy cập không cần login
-                .anyRequest().authenticated() // Các API khác phải login
-            )
-            .httpBasic(); // Sử dụng Basic Authentication
-
-        return http.build();
+    JwtDecoder jwtDecoder() {
+        SecretKeySpec secretKey = new SecretKeySpec(signerKey.getBytes(), "HS512");
+        
+        return NimbusJwtDecoder
+            .withSecretKey(secretKey)
+            .macAlgorithm(MacAlgorithm.HS512)
+            .build();
     }
 }

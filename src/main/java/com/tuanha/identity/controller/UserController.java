@@ -20,12 +20,17 @@ import com.tuanha.identity.model.User;
 import com.tuanha.identity.service.IUserService;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-    @Autowired
-    private IUserService userService;
+    
+    IUserService userService;
 
     @GetMapping
     public List<User> getAllUsers() {

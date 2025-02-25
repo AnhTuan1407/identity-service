@@ -1,5 +1,6 @@
 package com.tuanha.identity.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
 import com.tuanha.identity.dto.response.UserResponse;
+import com.tuanha.identity.enums.Role;
 import com.tuanha.identity.exception.AppException;
 import com.tuanha.identity.exception.ErrorCode;
 import com.tuanha.identity.mapper.IUserMapper;
@@ -17,13 +19,19 @@ import com.tuanha.identity.model.User;
 import com.tuanha.identity.repository.IUserRepository;
 import com.tuanha.identity.service.IUserService;
 
-@Service
-public class UserServiceImpl implements IUserService {
-    @Autowired
-    private IUserRepository userRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.AccessLevel;
 
-    @Autowired
-    private IUserMapper userMapper;
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class UserServiceImpl implements IUserService {
+    IUserRepository userRepository;
+
+    IUserMapper userMapper;
+
+    PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> getAllUsers() {
@@ -38,9 +46,13 @@ public class UserServiceImpl implements IUserService {
 
         User user = userMapper.toUser(request);
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+
+        user.setRoles(roles);
+
         return userRepository.save(user);
     }
 

@@ -8,9 +8,10 @@ import com.tuanha.identity.dto.response.UserResponse;
 import com.tuanha.identity.model.User;
 
 public interface IUserService {
-    List<User> getAllUsers();
+    List<UserResponse> getAllUsers();
     User createUser(UserCreateRequest request);
     UserResponse updateUser(UserUpdateRequest request, String userId);
     void deleteUser(String userId);
     UserResponse getUser(String userId);
+    UserResponse getMyInfo();
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,9 +23,10 @@ import com.tuanha.identity.enums.Role;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENPOINTS = {"/auth/login", "/auth/introspect", "/users"};
+    private final String[] PUBLIC_ENPOINTS = {"/auth/token", "/auth/introspect", "/users", "/users/myInfo"};
 
     @Value("${jwt.signerKey}")
     private String signerKey;
@@ -33,7 +35,7 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeRequests(
             (authorizeRequest) -> authorizeRequest.requestMatchers(HttpMethod.POST, PUBLIC_ENPOINTS).permitAll()
-                .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
+                // .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
                 .anyRequest().authenticated()
         );
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
@@ -42,6 +44,7 @@ public class SecurityConfig {
             oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
             )
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 
         return httpSecurity.build();

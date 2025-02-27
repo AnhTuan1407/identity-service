@@ -112,7 +112,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private String buildScope(User user) {
         StringJoiner joiner = new StringJoiner(" ");
         if (!CollectionUtils.isEmpty(user.getRoles())) {
-            user.getRoles().forEach(joiner::add);
+            // user.getRoles().forEach(joiner::add);
         }
 
         return joiner.toString();

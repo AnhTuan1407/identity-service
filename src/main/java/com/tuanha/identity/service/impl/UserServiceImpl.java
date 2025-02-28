@@ -1,10 +1,9 @@
 package com.tuanha.identity.service.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,14 +11,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tuanha.identity.constant.PredefinedRole;
 import com.tuanha.identity.dto.request.UserCreateRequest;
 import com.tuanha.identity.dto.request.UserUpdateRequest;
 import com.tuanha.identity.dto.response.UserResponse;
-import com.tuanha.identity.enums.Role;
 import com.tuanha.identity.exception.AppException;
 import com.tuanha.identity.exception.ErrorCode;
 import com.tuanha.identity.mapper.IUserMapper;
+import com.tuanha.identity.model.Permission;
+import com.tuanha.identity.model.Role;
 import com.tuanha.identity.model.User;
+import com.tuanha.identity.repository.IPermissionRepository;
+import com.tuanha.identity.repository.IRoleRepository;
 import com.tuanha.identity.repository.IUserRepository;
 import com.tuanha.identity.service.IUserService;
 
@@ -39,6 +42,10 @@ public class UserServiceImpl implements IUserService {
 
     PasswordEncoder passwordEncoder;
 
+    IRoleRepository roleRepository;
+
+    IPermissionRepository permissionRepository;
+
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
@@ -52,13 +59,12 @@ public class UserServiceImpl implements IUserService {
         }
 
         User user = userMapper.toUser(request);
-
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
 
-        // user.setRoles(roles);
+        HashSet<Role> roles = new HashSet<>();
+        roleRepository.findById(PredefinedRole.ROLE_USER).ifPresent(roles::add);
+
+        user.setRoles(roles);
 
         return userRepository.save(user);
     }
@@ -67,6 +73,12 @@ public class UserServiceImpl implements IUserService {
     public UserResponse updateUser(UserUpdateRequest request, String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, request);
+
+        var roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+        user.setRoles(roles);
+        
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

@@ -1,6 +1,9 @@
 package com.tuanha.identity.model;
 
+import java.time.LocalDate;
 import java.util.Set;
+
+import com.tuanha.identity.validation.DobConstraint;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +32,9 @@ public class User {
     String password;
     String firstName;
     String lastName;
+
+    @DobConstraint(min = 18, message = "DOB_INVALID")
+    LocalDate dob;
 
     @ManyToMany
     Set<Role> roles;

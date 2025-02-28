@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nimbusds.jose.JOSEException;
 import com.tuanha.identity.dto.request.AuthenticationRequest;
 import com.tuanha.identity.dto.request.IntrospectRequest;
+import com.tuanha.identity.dto.request.LogoutRequest;
 import com.tuanha.identity.dto.response.ApiResponse;
 import com.tuanha.identity.dto.response.AuthenticationResponse;
 import com.tuanha.identity.dto.response.IntrospectResponse;
@@ -43,4 +44,10 @@ public class AuthenticationController {
         .build();
     }
 
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder()
+        .build();
+    }
 }

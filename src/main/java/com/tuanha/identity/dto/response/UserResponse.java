@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import com.tuanha.identity.model.Role;
@@ -22,5 +23,6 @@ public class UserResponse {
     String username;
     String firstName;
     String lastName;
-    Set<Role> roles;
+    LocalDate dob;
+    Set<RoleResponse> roles;
 }
